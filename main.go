@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"strings"
@@ -14,10 +16,14 @@ type apiConfigData struct {
 type weatherData struct {
 	Name string `json:"name"`
 	Main struct {
-		Kelvin   float64 `json:"temp"`
-		KelvinMax   float64 `json:"temp_max"`
-		KelvinMin   float64 `json:"temp_min"`
-		Humidity float64 `json:"humidity"`
+		Kelvin     float64 `json:"temp"`
+		KelvinLike float64 `json:"feels_like"`
+		KelvinMax  float64 `json:"temp_max"`
+		KelvinMin  float64 `json:"temp_min"`
+		Humidity   float64 `json:"humidity"`
+		Celsius    int
+		CelsiusMax int
+		CelsiusMin int
 	} `json:"main"`
 }
 
@@ -34,8 +40,27 @@ func loadApiConfig(filename string) (apiConfigData, error) {
 	return c, nil
 }
 
+// RenderTemplate renders the specified template with data
+func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+	t, err := template.ParseFiles(tmpl)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+	err = t.ExecuteTemplate(w, tmpl, data)
+	if err != nil {
+		fmt.Println("Error executing template: ", err)
+	}
+}
+
 func index(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello to my app"))
+	city := "oujda"
+	data, err := query(city)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+	RenderTemplate(w, "index.html", data)
 }
 
 func query(city string) (weatherData, error) {
@@ -49,12 +74,17 @@ func query(city string) (weatherData, error) {
 	}
 	defer resp.Body.Close()
 
-	var d weatherData
-	if err := json.NewDecoder(resp.Body).Decode(&d); err != nil {
+	var data weatherData
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return weatherData{}, err
 	}
 
-	return d, nil
+	// Convert temperatures from Kelvin to Celsius
+	data.Main.Celsius = int(data.Main.Kelvin - 273.15)
+	data.Main.CelsiusMax = int(data.Main.KelvinMax - 273.15)
+	data.Main.CelsiusMin = int(data.Main.KelvinMin - 273.15)
+
+	return data, nil
 }
 
 func weather(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +99,8 @@ func weather(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fs := http.FileServer(http.Dir("./assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	http.HandleFunc("/", index)
 	http.HandleFunc("/weather/", weather)
 	http.ListenAndServe(":8080", nil)

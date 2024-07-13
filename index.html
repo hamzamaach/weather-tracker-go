@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <article class="box weather">
+        <div class="icon bubble black">
+            <div class="spin">
+                <img src="https://dl.dropbox.com/s/0qq5anxliaopt8d/sun.png">
+            </div>
+        </div>
+
+        <h1>{{ .Name }}</h1>
+        <span class="temp">{{ .Main.Celsius }}&deg;</span>
+        <span class="high-low">{{ .Main.CelsiusMin }}&deg;/ {{ .Main.CelsiusMax }}&deg;</span>
+        <span class="high-low">Humidity: {{ .Main.Humidity }}%</span>
+    </article>
+
+</body>
+
+</html>
