@@ -5,21 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/style.css">
-    <title>Document</title>
+    <link rel="shortcut icon" href="https://dl.dropboxusercontent.com/s/0qq5anxliaopt8d/sun.ico" type="image/x-icon">
+    <title>Weather Tracker</title>
 </head>
 
 <body>
+    <div id="cover">
+        <form method="get" action="">
+            <div class="tb">
+                <div class="td"><input type="text" name="city" placeholder="Search city" value="{{.City}}" required>
+                </div>
+                <div class="td" id="s-cover">
+                    <button type="submit">
+                        <div id="s-circle"></div>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
     <article class="box weather">
+        {{ if .NotFound }}
+        <div class="not-found">
+            <span class="not-found-span">City not found !</span>
+        </div>
+        {{ else }}
         <div class="icon bubble black">
             <div class="spin">
-                <img src="https://dl.dropbox.com/s/0qq5anxliaopt8d/sun.png">
+                <img src="{{ .WeatherData.Weather.Icon }}">
             </div>
         </div>
 
-        <h1>{{ .Name }}</h1>
-        <span class="temp">{{ .Main.Celsius }}&deg;</span>
-        <span class="high-low">{{ .Main.CelsiusMin }}&deg;/ {{ .Main.CelsiusMax }}&deg;</span>
-        <span class="high-low">Humidity: {{ .Main.Humidity }}%</span>
+        <span class="local-time">{{ .WeatherData.Sys.LocalTime }}</span>
+        <h1 class="city">{{ .WeatherData.Name }}, {{ .WeatherData.Sys.Country }}
+            <img src="{{.WeatherData.Sys.Flag}}" alt="{{.WeatherData.Sys.Country}}" style="width:20px;">
+        </h1>
+        <span class="temp">{{ .WeatherData.Main.Celsius }}&deg;C</span>
+        <span class="high-low">{{ .WeatherData.Weather.Description }}</span>
+        <div class="details-div">
+            <span class="details">Humidity: {{ .WeatherData.Main.Humidity }}%</span>
+            <span class="details">Wind speed: {{ .WeatherData.Wind.SpeedKmh }} km/h</span>
+            <span class="details">Pressure: {{ .WeatherData.Main.Pressure }} hPa</span>
+        </div>
+        <div class="sun">
+            <div class="sunrise">
+                <span class="sun-title">Sunrise</span>
+                <span class="sun-value"> {{ .WeatherData.Sys.SunriseTime }}</span>
+            </div>
+            <div class="sunset">
+                <span class="sun-title">Sunset</span>
+                <span class="sun-value"> {{ .WeatherData.Sys.SunsetTime }}</span>
+            </div>
+        </div>
+        {{ end }}
     </article>
 
 </body>
