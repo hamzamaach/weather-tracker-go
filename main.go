@@ -173,21 +173,9 @@ func query(city string) (weatherData, error) {
 	return data, nil
 }
 
-func weather(w http.ResponseWriter, r *http.Request) {
-	city := strings.SplitN(r.URL.Path, "/", 3)[2]
-	data, err := query(city)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-type", "application/json;charset=utf-8")
-	json.NewEncoder(w).Encode(data)
-}
-
 func main() {
 	fs := http.FileServer(http.Dir("./assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	http.HandleFunc("/", index)
-	http.HandleFunc("/weather/", weather)
 	http.ListenAndServe(":8080", nil)
 }
